@@ -26,7 +26,8 @@ output [19:0]SRAM_ADDR;
 output [9:0] VGA_R,VGA_G,VGA_B;
 output TD_RESET_N;
 output VGA_HS,VGA_VS, VGA_BLANK_N, VGA_CLK, VGA_SYNC_N,SRAM_CE_N,SRAM_UB_N,SRAM_LB_N,SRAM_WE_N,SRAM_OE_N;
-output[17:0]LEDR,SW;
+output[17:0]LEDR;
+input [17:0]SW;
 inout [15:0]SRAM_DQ;
 
 reg led;
@@ -55,8 +56,7 @@ wire x_low_bit, y_low_bit;
 wire DLY_RST;
 wire RST_N = DLY_RST&KEY[0];
 
-reg [8:0] x_walker,y_walker;
-reg [3:0] sum;
+reg [9:0] x_walker,y_walker;
 reg lock;
 
 wire[9:0]Coord_X,Coord_Y;
@@ -89,7 +89,7 @@ vgadll pll(
 	locked);
 
 assign SRAM_ADDR=addr_reg;
-assign LEDR=SRAM_DQ;
+assign LEDR=data_reg;
 
 assign SRAM_DQ=(we)?16'hzzzz:data_reg;
 //assign SRAM_WE_N=we;
@@ -100,35 +100,100 @@ assign mVGA_B={SRAM_DQ[7:4],6'b0};
 assign x_low_bit=x_rand[22]^x_rand[30];
 assign y_low_bit=y_rand[26]^y_rand[28];
 
+reg sum;
+reg [13:0] walkercount;
+
 always @(posedge VGA_CTL_CLK) begin
-	x_rand <= x_rand << 1 & x_low_bit;
-	y_rand <= y_rand << 1 & y_low_bit;
+	x_rand <= (x_rand << 1) + x_low_bit;
+	y_rand <= (y_rand << 1) + y_low_bit;
 	// Key 0 = VGA reset
 
 	if(~KEY[1])begin
-	   addr_reg <= {Coord_X[9:1],Coord_Y[9:1]};
-		we=1'b0;
-		data_reg<=16'h0;
+	   addr_reg <= {Coord_X[9:0],Coord_Y[9:0]};
+		we<=1'b0;
+		data_reg<={16'b0};//Coord_X[3:0],Coord_X[7:4]
 		x_rand<=31'b1;
 		y_rand<=29'b1;
 		x_walker<=9'd155;
 		y_walker<=9'd120;
-		state<=0; //init
+		state<=15; //init
 	end
-
-	else if(state==0) begin
-		addr_reg <= {8'd128,8'd128};
+	else if(~KEY[2]) begin
+		we<=1'b0;
 		data_reg<=16'hffff;
-		we=1'b0;
+		//addr_reg<=SW;
+		addr_reg<={x_rand[9:0],y_rand[9:0]};
+		state <=15;
+	end
+	/*
+	else if(state==0) begin
+		addr_reg <= {10'd80,10'd200};
+		data_reg<=16'hffff;
+		we<=1'b0;
 		state<=1;
+		walkercount<=1;
 	end
-	else if(state==1) begin
-		addr_reg <= {Coord_X[9:1],Coord_Y[9:1]};
-		we=1'b1;
+	else if(state==1)begin
+		we<=1'b1;
+		addr_reg <= {x_walker-1,y_walker};
+		state<=2;
 	end
+	else if(state==2)begin
+		addr_reg <= {x_walker+1,y_walker};
+		sum<=(data_reg==16'b0)?sum:1;
+		state<=3;
+	end
+	else if(state==3)begin
+		addr_reg <= {x_walker,y_walker-1};
+		sum<=(data_reg==16'b0)?sum:1;
+		state<=4;
+	end
+	else if(state==4)begin
+		addr_reg <= {x_walker,y_walker+1};
+		sum<=(data_reg==16'b0)?sum:1;
+		state<=5;
+	end
+	else if(state==5)begin
+		if(sum | (data_reg==16'hffff)) begin//draw-state
+			state<=10; 
+			we<=1'b0;
+			addr_reg<={x_walker,y_walker};
+			data_reg<=16'hffff;
+		end
+		else begin
+			x_walker <= x_walker + (x_low_bit)?1:-1;
+			y_walker <= y_walker + (y_low_bit)?1:-1;
+			state<=6;
+		end
+	end
+	else if(state==6)begin
+		if((x_walker ==640) | (y_walker==480) | (x_walker == 1023) | (y_walker == 1023)) begin
+			state<=7;
+		end
+		else state <=1;
+	end
+	else if(state==7)begin
+		we<=1'b1;
+		if (walkercount ==0) begin
+			state<=15;
+		end
+		else begin
+			x_walker<=(x_low_bit)?0:639;
+			y_walker<=(y_low_bit)?0:479;
+			state <=1;
+		end
+	end
+	else if(state==10) begin
+		we<=1'b0;
+		walkercount<=walkercount+1;
+		state<=7;
+	end
+	*/
+	else if(state==15) begin
+		addr_reg <= {Coord_X[9:0],Coord_Y[9:0]};
+		we<=1'b1;
+	end
+	
 end
-
-//assign LEDR[1]=led;
-
 
 endmodule
