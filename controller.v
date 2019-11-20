@@ -41,6 +41,8 @@ assign SRAM_UB_N=1'b0;
 assign SRAM_LB_N=1'b0;
 assign SRAM_OE_N=~we;
 
+reg[17:0] LEDR_buf;
+assign LEDR=LEDR_buf;
 /*
 assign GPIO[39] = 0;
 assign GPIO[0] = 0;
@@ -78,8 +80,6 @@ wire[9:0]Coord_X,Coord_Y;
 initial begin
 x_rand  <= 31'b1;
 y_rand <= 31'b1;
-x_walker <= 10'd4;
-y_walker <= 10'd4;
 state<=0;
 end
 
@@ -109,7 +109,7 @@ vgadll pll(
 	locked);
 
 assign SRAM_ADDR=addr_reg;
-assign LEDR=data_reg;
+//assign LEDR=data_reg;
 
 assign SRAM_DQ=(we)?16'hzzzz:data_reg;
 //assign SRAM_WE_N=we;
@@ -133,17 +133,16 @@ always @(posedge VGA_CTL_CLK) begin
 	   addr_reg <= {Coord_X[9:0],Coord_Y[9:0]};
 		we<=1'b0;
 		data_reg<={16'b0};//Coord_X[3:0],Coord_X[7:4]
-		x_rand<=31'd263245;
-		y_rand<=29'd372345;
-		x_walker<=9'd155;
-		y_walker<=9'd120;
+		
+		
 		state<=0; //init
 	end
 	else if(~KEY[2]) begin
 		we<=1'b0;
-		data_reg<=16'hffff;
-		addr_reg<=SW;
+		data_reg<=16'h0000;
+		//addr_reg<=SW;
 		//addr_reg<={x_rand[9:0],y_rand[9:0]};
+		addr_reg <= {Coord_X[9:0],Coord_Y[9:0]};
 		state <=0;
 	end
 	
@@ -152,31 +151,38 @@ always @(posedge VGA_CTL_CLK) begin
 		data_reg<=16'hffff;
 		we<=1'b0;
 		state<=1;
+		x_walker<=(x_low_bit)?0:639;
+		y_walker<=(y_low_bit)?0:479;
 		walkercount<=1;
 	end
 	else if(state==1)begin
 		we<=1'b1;
-		addr_reg <= {x_walker-1,y_walker};
+		addr_reg <= {(x_walker>0)?x_walker-1:x_walker,y_walker};
 		sum <= 0;
 		state<=2;
+		LEDR_buf[0]<=sum;
 	end
 	else if(state==2)begin
-		addr_reg <= {x_walker+1,y_walker};
-		sum<=(data_reg!=16'hffff)?sum:1;
+		addr_reg <= {(x_walker<639)?x_walker+1:x_walker,y_walker};
+		sum<=(SRAM_DQ!=16'hffff)?sum:1;
 		state<=3;
+		LEDR_buf[1]<=sum;
 	end
 	else if(state==3)begin
-		addr_reg <= {x_walker,y_walker-1};
-		sum<=(data_reg!=16'hffff)?sum:1;
+		addr_reg <= {x_walker,(y_walker>0)?y_walker-1:y_walker};
+		sum<=(SRAM_DQ!=16'hffff)?sum:1;
 		state<=4;
+		LEDR_buf[2]<=sum;
 	end
 	else if(state==4)begin
-		addr_reg <= {x_walker,y_walker+1};
-		sum<=(data_reg!=16'hffff)?sum:1;
+		addr_reg <= {x_walker,(y_walker<479)?y_walker+1:y_walker};
+		sum<=(SRAM_DQ!=16'hffff)?sum:1;
 		state<=5;
+		LEDR_buf[3]<=sum;
 	end
 	else if(state==5)begin
-		if(~sum || ~(data_reg==16'hffff)) begin//draw-state
+		LEDR_buf[4]<=SRAM_DQ==16'hffff;
+		if(sum || (SRAM_DQ==16'hffff)) begin//draw-state
 			state<=10; 
 			we<=1'b0;
 			addr_reg<={x_walker,y_walker};
@@ -200,15 +206,15 @@ always @(posedge VGA_CTL_CLK) begin
 			state<=15;
 		end
 		else begin
-			//x_walker<=(x_low_bit)?0:639;
-			//y_walker<=(y_low_bit)?0:479;
-			x_walker <= x_rand;
-			y_walker <= y_rand;
+			x_walker<=(x_low_bit)?0:639;
+			y_walker<=(y_low_bit)?0:479;
+			//x_walker <= x_rand;
+			//y_walker <= y_rand;
 			state <=1;
 		end
 	end
 	else if(state==10) begin
-		we<=1'b0;
+		//we<=1'b0;
 		walkercount<=walkercount+1;
 		state<=7;
 	end
