@@ -1,0 +1,108 @@
+/*
+WARNING: Do NOT edit the input and output ports in this file in a text
+editor if you plan to continue editing the block that represents it in
+the Block Editor! File corruption is VERY likely to occur.
+*/
+/*
+Copyright (C) 2019  Intel Corporation. All rights reserved.
+Your use of Intel Corporation's design tools, logic functions 
+and other software and tools, and any partner logic 
+functions, and any output files from any of the foregoing 
+(including device programming or simulation files), and any 
+associated documentation or information are expressly subject 
+to the terms and conditions of the Intel Program License 
+Subscription Agreement, the Intel Quartus Prime License Agreement,
+the Intel FPGA IP License Agreement, or other applicable license
+agreement, including, without limitation, that your use is for
+the sole purpose of programming logic devices manufactured by
+Intel and sold by Intel or its authorized distributors.  Please
+refer to the applicable agreement for further details, at
+https://fpgasoftware.intel.com/eula.
+*/
+(header "symbol" (version "1.1"))
+(symbol
+	(rect 0 0 320 240)
+	(text "testram" (rect 138 -1 168 11)(font "Arial" (font_size 10)))
+	(text "inst" (rect 8 224 20 236)(font "Arial" ))
+	(port
+		(pt 0 72)
+		(input)
+		(text "clk" (rect 0 0 10 12)(font "Arial" (font_size 8)))
+		(text "clk" (rect 4 61 22 72)(font "Arial" (font_size 8)))
+		(line (pt 0 72)(pt 112 72)(line_width 1))
+	)
+	(port
+		(pt 0 112)
+		(input)
+		(text "cdt_write" (rect 0 0 35 12)(font "Arial" (font_size 8)))
+		(text "cdt_write" (rect 4 101 58 112)(font "Arial" (font_size 8)))
+		(line (pt 0 112)(pt 112 112)(line_width 1))
+	)
+	(port
+		(pt 0 128)
+		(input)
+		(text "cdt_read" (rect 0 0 35 12)(font "Arial" (font_size 8)))
+		(text "cdt_read" (rect 4 117 52 128)(font "Arial" (font_size 8)))
+		(line (pt 0 128)(pt 112 128)(line_width 1))
+	)
+	(port
+		(pt 0 144)
+		(input)
+		(text "cdt_chipselect" (rect 0 0 55 12)(font "Arial" (font_size 8)))
+		(text "cdt_chipselect" (rect 4 133 88 144)(font "Arial" (font_size 8)))
+		(line (pt 0 144)(pt 112 144)(line_width 1))
+	)
+	(port
+		(pt 0 160)
+		(input)
+		(text "cdt_outputenable" (rect 0 0 66 12)(font "Arial" (font_size 8)))
+		(text "cdt_outputenable" (rect 4 149 100 160)(font "Arial" (font_size 8)))
+		(line (pt 0 160)(pt 112 160)(line_width 1))
+	)
+	(port
+		(pt 0 176)
+		(input)
+		(text "cdt_address[19..0]" (rect 0 0 73 12)(font "Arial" (font_size 8)))
+		(text "cdt_address[19..0]" (rect 4 165 112 176)(font "Arial" (font_size 8)))
+		(line (pt 0 176)(pt 112 176)(line_width 3))
+	)
+	(port
+		(pt 0 208)
+		(input)
+		(text "cdt_byteenable" (rect 0 0 60 12)(font "Arial" (font_size 8)))
+		(text "cdt_byteenable" (rect 4 197 88 208)(font "Arial" (font_size 8)))
+		(line (pt 0 208)(pt 112 208)(line_width 1))
+	)
+	(port
+		(pt 0 192)
+		(bidir)
+		(text "cdt_data_io[15..0]" (rect 0 0 69 12)(font "Arial" (font_size 8)))
+		(text "cdt_data_io[15..0]" (rect 4 181 112 192)(font "Arial" (font_size 8)))
+		(line (pt 0 192)(pt 112 192)(line_width 3))
+	)
+	(drawing
+		(text "clk" (rect 97 43 212 99)(font "Arial" (color 128 0 0)(font_size 9)))
+		(text "clk" (rect 117 67 252 144)(font "Arial" (color 0 0 0)))
+		(text "conduit" (rect 72 83 186 179)(font "Arial" (color 128 0 0)(font_size 9)))
+		(text "cdt_write" (rect 117 107 288 224)(font "Arial" (color 0 0 0)))
+		(text "cdt_read" (rect 117 123 282 256)(font "Arial" (color 0 0 0)))
+		(text "cdt_chipselect" (rect 117 139 318 288)(font "Arial" (color 0 0 0)))
+		(text "cdt_outputenable" (rect 117 155 330 320)(font "Arial" (color 0 0 0)))
+		(text "cdt_address" (rect 117 171 300 352)(font "Arial" (color 0 0 0)))
+		(text "cdt_data_io" (rect 117 187 300 384)(font "Arial" (color 0 0 0)))
+		(text "cdt_byteenable" (rect 117 203 318 416)(font "Arial" (color 0 0 0)))
+		(text " testram " (rect 284 224 622 458)(font "Arial" ))
+		(line (pt 112 32)(pt 208 32)(line_width 1))
+		(line (pt 208 32)(pt 208 224)(line_width 1))
+		(line (pt 112 224)(pt 208 224)(line_width 1))
+		(line (pt 112 32)(pt 112 224)(line_width 1))
+		(line (pt 113 52)(pt 113 76)(line_width 1))
+		(line (pt 114 52)(pt 114 76)(line_width 1))
+		(line (pt 113 92)(pt 113 212)(line_width 1))
+		(line (pt 114 92)(pt 114 212)(line_width 1))
+		(line (pt 0 0)(pt 320 0)(line_width 1))
+		(line (pt 320 0)(pt 320 240)(line_width 1))
+		(line (pt 0 240)(pt 320 240)(line_width 1))
+		(line (pt 0 0)(pt 0 240)(line_width 1))
+	)
+)

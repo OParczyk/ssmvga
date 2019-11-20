@@ -1,0 +1,66 @@
+Info: Starting: Create simulation model
+Info: qsys-generate /home/oliver/MEGA/MEGAsync/workspace/FPGA-Projekte/diff2d/testram.qsys --simulation=VERILOG --allow-mixed-language-simulation --output-directory=/home/oliver/MEGA/MEGAsync/workspace/FPGA-Projekte/diff2d/testram/simulation --family="Cyclone IV E" --part=EP4CE115F29C7
+Progress: Loading diff2d/testram.qsys
+Progress: Reading input file
+Progress: Adding external_memory_bfm_0 [altera_external_memory_bfm 19.1]
+Info: altera_external_memory_bfm: Preferred Simulation Language is set to None.
+Progress: Parameterizing module external_memory_bfm_0
+Progress: Building connections
+Progress: Parameterizing connections
+Progress: Validating
+Progress: Done reading input file
+Info: testram: Generating testram "testram" for SIM_VERILOG
+Warning: external_memory_bfm_0: get_parameter_value: Getting the value of INIT_FILE from generate2 callback may cause errors (as AFFECTS_GENERATION is false for this parameter)
+Info: external_memory_bfm_0: "testram" instantiated altera_external_memory_bfm "external_memory_bfm_0"
+Info: testram: Done "testram" with 2 modules, 3 files
+Info: qsys-generate succeeded.
+Info: Finished: Create simulation model
+Info: Starting: Create Modelsim Project.
+Info: sim-script-gen --spd=/home/oliver/MEGA/MEGAsync/workspace/FPGA-Projekte/diff2d/testram/testram.spd --output-directory=/home/oliver/MEGA/MEGAsync/workspace/FPGA-Projekte/diff2d/testram/simulation/ --use-relative-paths=true
+Info: Doing: ip-make-simscript --spd=/home/oliver/MEGA/MEGAsync/workspace/FPGA-Projekte/diff2d/testram/testram.spd --output-directory=/home/oliver/MEGA/MEGAsync/workspace/FPGA-Projekte/diff2d/testram/simulation/ --use-relative-paths=true
+Info: Generating the following file(s) for MODELSIM simulator in /home/oliver/MEGA/MEGAsync/workspace/FPGA-Projekte/diff2d/testram/simulation/ directory:
+Info: 	mentor/msim_setup.tcl
+Info: Generating the following file(s) for VCS simulator in /home/oliver/MEGA/MEGAsync/workspace/FPGA-Projekte/diff2d/testram/simulation/ directory:
+Info: 	synopsys/vcs/vcs_setup.sh
+Info: Generating the following file(s) for VCSMX simulator in /home/oliver/MEGA/MEGAsync/workspace/FPGA-Projekte/diff2d/testram/simulation/ directory:
+Info: 	synopsys/vcsmx/synopsys_sim.setup
+Info: 	synopsys/vcsmx/vcsmx_setup.sh
+Info: Generating the following file(s) for NCSIM simulator in /home/oliver/MEGA/MEGAsync/workspace/FPGA-Projekte/diff2d/testram/simulation/ directory:
+Info: 	cadence/cds.lib
+Info: 	cadence/hdl.var
+Info: 	cadence/ncsim_setup.sh
+Info: 	1 .cds.lib files in cadence/cds_libs/ directory
+Info: Generating the following file(s) for RIVIERA simulator in /home/oliver/MEGA/MEGAsync/workspace/FPGA-Projekte/diff2d/testram/simulation/ directory:
+Info: 	aldec/rivierapro_setup.tcl
+Info: For information on how to simulate your IP, see the explanatory comments in the simulator-specific subdirectories under /home/oliver/MEGA/MEGAsync/workspace/FPGA-Projekte/diff2d/testram/simulation/.
+Info: Regenerate these scripts whenever you make any change to any Quartus-generated IP in your project.
+Info: Finished: Create Modelsim Project.
+Info: Starting: Create block symbol file (.bsf)
+Info: qsys-generate /home/oliver/MEGA/MEGAsync/workspace/FPGA-Projekte/diff2d/testram.qsys --block-symbol-file --output-directory=/home/oliver/MEGA/MEGAsync/workspace/FPGA-Projekte/diff2d/testram --family="Cyclone IV E" --part=EP4CE115F29C7
+Progress: Loading diff2d/testram.qsys
+Progress: Reading input file
+Progress: Adding external_memory_bfm_0 [altera_external_memory_bfm 19.1]
+Progress: Parameterizing module external_memory_bfm_0
+Progress: Building connections
+Progress: Parameterizing connections
+Progress: Validating
+Progress: Done reading input file
+Info: qsys-generate succeeded.
+Info: Finished: Create block symbol file (.bsf)
+Info: 
+Info: Starting: Create HDL design files for synthesis
+Info: qsys-generate /home/oliver/MEGA/MEGAsync/workspace/FPGA-Projekte/diff2d/testram.qsys --synthesis=VERILOG --output-directory=/home/oliver/MEGA/MEGAsync/workspace/FPGA-Projekte/diff2d/testram/synthesis --family="Cyclone IV E" --part=EP4CE115F29C7
+Progress: Loading diff2d/testram.qsys
+Progress: Reading input file
+Progress: Adding external_memory_bfm_0 [altera_external_memory_bfm 19.1]
+Progress: Parameterizing module external_memory_bfm_0
+Progress: Building connections
+Progress: Parameterizing connections
+Progress: Validating
+Progress: Done reading input file
+Info: testram: Generating testram "testram" for QUARTUS_SYNTH
+Warning: external_memory_bfm_0: get_parameter_value: Getting the value of INIT_FILE from generate2 callback may cause errors (as AFFECTS_GENERATION is false for this parameter)
+Info: external_memory_bfm_0: "testram" instantiated altera_external_memory_bfm "external_memory_bfm_0"
+Info: testram: Done "testram" with 2 modules, 3 files
+Info: qsys-generate succeeded.
+Info: Finished: Create HDL design files for synthesis

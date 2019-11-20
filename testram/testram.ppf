@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pinplan
+ variation_name="external_memory_bfm_0"
+ megafunction_name="ALTERA_EXTERNAL_MEMORY_BFM"
+ specifies="all_ports">
+ <global>
+  <pin name="clk" direction="input" scope="external" />
+  <pin name="cdt_write" direction="input" scope="external" />
+  <pin name="cdt_read" direction="input" scope="external" />
+  <pin name="cdt_chipselect" direction="input" scope="external" />
+  <pin name="cdt_outputenable" direction="input" scope="external" />
+  <pin name="cdt_address[19..0]" direction="input" scope="external" />
+  <pin name="cdt_data_io[15..0]" direction="bidir" scope="external" />
+  <pin name="cdt_byteenable" direction="input" scope="external" />
+ </global>
+</pinplan>

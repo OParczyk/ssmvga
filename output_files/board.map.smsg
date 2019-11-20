@@ -1,0 +1,2 @@
+Warning (10268): Verilog HDL information at altera_external_memory_bfm.sv(209): always construct contains both blocking and non-blocking assignments File: /home/oliver/MEGA/MEGAsync/workspace/FPGA-Projekte/diff2d/testram/synthesis/submodules/altera_external_memory_bfm.sv Line: 209
+Warning (10268): Verilog HDL information at sram_test.v(35): always construct contains both blocking and non-blocking assignments File: /home/oliver/MEGA/MEGAsync/workspace/FPGA-Projekte/diff2d/sram_test.v Line: 35

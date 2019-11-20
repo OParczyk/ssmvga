@@ -1,0 +1,12 @@
+transcript on
+if {[file exists rtl_work]} {
+	vdel -lib rtl_work -all
+}
+vlib rtl_work
+vmap work rtl_work
+
+vlog -vlog01compat -work work +incdir+/home/oliver/MEGA/MEGAsync/workspace/FPGA-Projekte/diff2d {/home/oliver/MEGA/MEGAsync/workspace/FPGA-Projekte/diff2d/vgadll.v}
+vlog -vlog01compat -work work +incdir+/home/oliver/MEGA/MEGAsync/workspace/FPGA-Projekte/diff2d {/home/oliver/MEGA/MEGAsync/workspace/FPGA-Projekte/diff2d/controller.v}
+vlog -vlog01compat -work work +incdir+/home/oliver/MEGA/MEGAsync/workspace/FPGA-Projekte/diff2d/db {/home/oliver/MEGA/MEGAsync/workspace/FPGA-Projekte/diff2d/db/vgadll_altpll.v}
+vlog -vlog01compat -work work +incdir+/home/oliver/MEGA/MEGAsync/workspace/VGA_Controller {/home/oliver/MEGA/MEGAsync/workspace/VGA_Controller/VGA_Controller.v}
+

@@ -1,0 +1,22 @@
+module controller(input TD_CLK27);
+
+wire reset;
+
+reg[17:0]addr_reg;
+reg[15:0]data_reg;
+reg we;
+
+reg [3:0] state;
+reg [7:0] led;
+reg [30:0] x_rand;
+reg [30:0] y_rand;
+
+wire x_low_bit, y_low_bit;
+
+reg [8:0] x_walker,y_walker;
+reg [3:0] sum;
+reg lock;
+
+assign TD_RESET=1'b1:
+
+endmodule

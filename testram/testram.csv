@@ -1,0 +1,19 @@
+# system info testram on 2019.11.20.13:45:21
+system_info:
+name,value
+DEVICE,EP4CE115F29C7
+DEVICE_FAMILY,Cyclone IV E
+GENERATION_ID,1574253921
+#
+#
+# Files generated for testram on 2019.11.20.13:45:21
+files:
+filepath,kind,attributes,module,is_top
+simulation/testram.v,VERILOG,,testram,true
+simulation/submodules/altera_external_memory_bfm.sv,SYSTEM_VERILOG,,altera_external_memory_bfm,false
+simulation/submodules/altera_external_memory_bfm.hex,HEX,,altera_external_memory_bfm,false
+#
+# Map from instance-path to kind of module
+instances:
+instancePath,module
+testram.external_memory_bfm_0,altera_external_memory_bfm
