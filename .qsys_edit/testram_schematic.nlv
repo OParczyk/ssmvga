@@ -1,0 +1,8 @@
+# # File gsaved with Nlview version 6.3.8  2013-12-19 bk=1.2992 VDI=34 GEI=35
+# 
+preplace inst unsaved.external_memory_bfm_0 -pg 1 -lvl 1 -y 30
+preplace inst unsaved -pg 1 -lvl 1 -y 40 -regy -20
+preplace netloc EXPORT<net_container>unsaved</net_container>(SLAVE)external_memory_bfm_0.conduit,(SLAVE)unsaved.conduit) 1 0 1 NJ
+preplace netloc EXPORT<net_container>unsaved</net_container>(SLAVE)unsaved.clk,(SLAVE)external_memory_bfm_0.clk) 1 0 1 NJ
+levelinfo -pg 1 0 60 280
+levelinfo -hier unsaved 70 140 270
