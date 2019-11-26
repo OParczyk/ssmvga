@@ -219,6 +219,7 @@ always @(posedge VGA_CTL_CLK) begin
 		write_enable<=1'b0;
 		if((x_walker >=640) | (y_walker>=480)) begin
 			state<=4'd7;
+			$display("we ran of the map :(");
 		end
 		else state <=4'd12;
 	end
