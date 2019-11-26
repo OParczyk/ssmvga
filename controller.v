@@ -86,7 +86,8 @@ assign HO4=addr_reg[19:16];
 initial begin
 	x_rand  <= 31'b1;
 	y_rand <= 31'b1;
-	state<=4'b0;
+	state <= 4'b0;
+	write_enable <= 0;
 end
 
 Reset_Delay rd(.iCLK(CLOCK_50),.oRESET(DLY_RST));
@@ -114,11 +115,11 @@ vgadll pll(
 	VGA_CTL_CLK,
 	VGA_CLK,
 	locked);
-//to_seven_digit(HO0, HEX0);
-//to_seven_digit(HO1, HEX1);
-//to_seven_digit(HO2, HEX2);
-//to_seven_digit(HO3, HEX3);
-//to_seven_digit(HO4, HEX4);
+to_seven_digit h0(HO0, HEX0);
+to_seven_digit h1(HO1, HEX1);
+to_seven_digit h2(HO2, HEX2);
+to_seven_digit h3(HO3, HEX3);
+to_seven_digit h4(HO4, HEX4);
 
 function [9:0] fix_10_bit_length(input [9:0] val);
   fix_10_bit_length = val[9:0];

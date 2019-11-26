@@ -1,4 +1,8 @@
-module to_seven_digit (input [6:0]number, output reg [6:0]HEX_OUT);
+module to_seven_digit (
+	input [6:0]number,
+	output reg [6:0]HEX_OUT
+);
+
 //Used to represent the input register number on the given output
 //Currently only correctly represents numbers up to base 16
 always @(number)

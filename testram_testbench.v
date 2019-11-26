@@ -48,7 +48,7 @@ module testram_testbench(output __dummy__);
 		.DATA(tr_data)
 	);
 	
-	always @(posedge clk50mhz && initialized) begin
+	always @(posedge clk50mhz) begin
 		case(state)
 			0: begin
 				we <= 0;
