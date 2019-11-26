@@ -11,31 +11,33 @@ module testram_testbench(output __dummy__);
 	wire [15:0] tr_data; 
 	
 	initial begin
-		#10000;
-		clk50mhz = 0;
-		clk27mhz = 0;
+		initialized = 0;
+		#1;
 		data = 0;
 		addr = 0;
 		state = 0;
-		#10000;
+		#1;
 		we <= 0;
 		oe <= 1;
-		#10000;
+		#1;
 		we <= 1;
-		#10000;
+		#1;
+		clk50mhz = 0;
+		clk27mhz = 0;
 		initialized <= 1;
 	end
 	
-	always begin 
+	always begin
 		#10000; 
-		if(initialized) clk50mhz= ~clk50mhz;
+		 if (initialized) clk50mhz= ~clk50mhz;
 	end
 	
 	always begin 
 		#37037; 
-		if(initialized) clk27mhz= ~clk27mhz;
+		if (initialized) clk27mhz= ~clk27mhz;
 	end
 
+	
 	
 	assign tr_data = (!we && oe)?data:16'hZZZZ;
 	
