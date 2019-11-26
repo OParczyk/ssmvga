@@ -114,11 +114,11 @@ vgadll pll(
 	VGA_CTL_CLK,
 	VGA_CLK,
 	locked);
-to_seven_digit(HO0, HEX0);
-to_seven_digit(HO1, HEX1);
-to_seven_digit(HO2, HEX2);
-to_seven_digit(HO3, HEX3);
-to_seven_digit(HO4, HEX4);
+//to_seven_digit(HO0, HEX0);
+//to_seven_digit(HO1, HEX1);
+//to_seven_digit(HO2, HEX2);
+//to_seven_digit(HO3, HEX3);
+//to_seven_digit(HO4, HEX4);
 
 function [9:0] fix_10_bit_length(input [9:0] val);
   fix_10_bit_length = val[9:0];
