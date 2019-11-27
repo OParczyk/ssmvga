@@ -55,15 +55,17 @@ reg [3:0] state;
 reg sum;
 reg [9:0] x_walker;
 reg [9:0] y_walker;
-reg [8:0] walkercount;
+reg [12:0] walkercount;
 
 assign TD_RESET_N =1'b1;
 assign SRAM_CE_N=1'b0;
 assign SRAM_UB_N=1'b0;
 assign SRAM_LB_N=1'b0;
-assign SRAM_OE_N=write_enable;
+assign SRAM_OE_N=write_enable | display_walker;
 assign SRAM_WE_N=~write_enable;
-assign SRAM_DQ=(write_enable)?data_reg:16'hzzzz;
+wire display_walker;
+assign display_walker = (addr_reg == {fix_10_bit_length(x_walker[9:0]),y_walker[9:0]} && (VGA_HS || VGA_VS));
+assign SRAM_DQ=(write_enable)?data_reg:(display_walker?16'hF0F0:16'hzzzz);
 assign SRAM_ADDR=addr_reg;
 assign mVGA_R={SRAM_DQ[15:12],6'b0};
 assign mVGA_G={SRAM_DQ[11:8],6'b0};
@@ -127,11 +129,11 @@ parameter
 	read_right=4'd2,
 	read_top=4'd3,
 	read_bot=4'd4,
-	test5=4'd5,
-	test6=4'd6, 
-	draw_walker=4'd7,
-	update_walker=4'd8,
-	new_walker=4'd9 ;
+	walk_walker=4'd5,
+	new_walker=4'd6,
+	bounds_check=4'd7,
+	display=4'd8
+;
 
 function [9:0] fix_10_bit_length(input [9:0] val);
   fix_10_bit_length = val[9:0];
@@ -150,7 +152,7 @@ always @(posedge VGA_CTL_CLK) begin
 	   addr_reg <= {Coord_X[9:0],Coord_Y[9:0]};
 		write_enable<=1'b1;
 		data_reg<={16'b0};		
-		state<=4'd0; //init
+		state<=init;
 	end
 	else if(~KEY[2]) begin
 		//pause
@@ -159,9 +161,9 @@ always @(posedge VGA_CTL_CLK) begin
 		write_enable<=1'b0;
 		addr_reg <= {Coord_X[9:0],Coord_Y[9:0]};
 	end
-	else begin
+	else if(~VGA_HS | ~VGA_VS) begin
 		case(state)
-			0: begin
+			init: begin
 				write_enable<=1'b1;
 				addr_reg <= {10'd80,10'd200};
 				data_reg<=16'hffff;
@@ -171,68 +173,65 @@ always @(posedge VGA_CTL_CLK) begin
 				y_walker<=(y_low_bit)?10'd200:10'd100;//9;
 				walkercount<=1;
 				
-				state<=4'd12;
+				state<=read_left;
 			end
-			12: begin
+			read_left: begin
 				write_enable<=1'b0;
 				if(y_walker>0) addr_reg <= {fix_10_bit_length(x_walker[9:0]-1),y_walker[9:0]};
 				else addr_reg <= {fix_10_bit_length(x_walker[9:0]+1),y_walker[9:0]};
 				sum <= 0;
-				state<=4'd2;
+				state<=read_right;
 			end
-			2: begin
+			read_right: begin
 				write_enable<=1'b0;
 				if(y_walker<639) addr_reg <= {fix_10_bit_length(x_walker[9:0]+1),y_walker[9:0]};
 				else addr_reg <= {fix_10_bit_length(x_walker[9:0]-1),y_walker[9:0]};
 				sum<=(data_reg==16'hffff);
-				
-				state<=4'd3;
+				state<=read_top;
 			end
-			3: begin
+			read_top: begin
 				write_enable<=1'b0;
 				if(y_walker>0) addr_reg <= {x_walker[9:0],fix_10_bit_length(y_walker-1)};
 				else addr_reg <= {x_walker[9:0],fix_10_bit_length(y_walker+1)};
 				sum<=((data_reg==16'hffff)|sum);
-				
-				state<=4'd4;
+				state<=read_bot;
 			end
-			4: begin
+			read_bot: begin
 				write_enable<=1'b0;
 				if(y_walker<639) addr_reg <= {x_walker[9:0],fix_10_bit_length(y_walker+1)};
 				else addr_reg <= {x_walker[9:0],fix_10_bit_length(y_walker-1)};
 				sum<=((data_reg==16'hffff)|sum);
-				
-				state<=4'd5;
+				state<=walk_walker;
 			end
-			5: begin
+			walk_walker: begin
 				//LEDG_buf[4]<=data_reg==16'hffff;
-				if(sum | (data_reg==16'hffff)) begin//draw-state
+				if(sum | (data_reg==16'hffff)) begin
+					//write walker
 					write_enable<=1'b1;
 					addr_reg<={x_walker[9:0],y_walker[9:0]};
 					data_reg<=16'hffff;
-					
-					state<=4'd10;
+               walkercount<=walkercount+1;
+               state<=new_walker;                                    
 				end
 				else begin
 					write_enable<=1'b0;
 					x_walker <= x_walker[9:0] + ((x_low_bit)?1:-1);
 					y_walker <= y_walker[9:0] + ((y_low_bit)?1:-1);
-					
-					state<=4'd6;
+					state<=bounds_check;
 				end
 			end
-			6: begin
+			bounds_check: begin
 				write_enable<=1'b0;
 				if((x_walker >=640) | (y_walker>=480)) begin
-					state<=4'd7;
+					state<=new_walker;
 					$display("we ran of the map :(");
 				end
-				else state <=4'd12;
+				else state <=read_left;
 			end
-			7: begin
+			new_walker: begin
 				write_enable<=1'b0;
 				if (walkercount ==0) begin
-					state<=4'd15;
+					state<=display;
 				end
 				else begin
 					x_walker<=(x_low_bit)?10'd0:10'd639;
@@ -240,20 +239,21 @@ always @(posedge VGA_CTL_CLK) begin
 					//x_walker <= x_rand;
 					//y_walker <= y_rand;
 					
-					state <=4'd12;
+					state <=read_left;
 				end
 			end
-			10: begin
-				write_enable<=1'b0;
-				walkercount<=walkercount+1;
-				state<=4'd7;
-			end
-			15: begin
+
+			display: begin
 				addr_reg <= {Coord_X[9:0],Coord_Y[9:0]};
 				write_enable<=1'b0;
 			end
 		endcase	
+	end 
+	else begin
+		addr_reg <= {Coord_X[9:0],Coord_Y[9:0]};
+		write_enable<=1'b0;
 	end
 end
+
 
 endmodule
