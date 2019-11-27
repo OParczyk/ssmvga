@@ -121,6 +121,18 @@ to_seven_digit h2(HO2, HEX2);
 to_seven_digit h3(HO3, HEX3);
 to_seven_digit h4(HO4, HEX4);
 
+parameter 
+	init=4'd0,
+	read_left=4'd1,
+	read_right=4'd2,
+	read_top=4'd3,
+	read_bot=4'd4,
+	test5=4'd5,
+	test6=4'd6, 
+	draw_walker=4'd7,
+	update_walker=4'd8,
+	new_walker=4'd9 ;
+
 function [9:0] fix_10_bit_length(input [9:0] val);
   fix_10_bit_length = val[9:0];
 endfunction
@@ -165,13 +177,6 @@ always @(posedge VGA_CTL_CLK) begin
 				write_enable<=1'b0;
 				if(y_walker>0) addr_reg <= {fix_10_bit_length(x_walker[9:0]-1),y_walker[9:0]};
 				else addr_reg <= {fix_10_bit_length(x_walker[9:0]+1),y_walker[9:0]};
-				state<=4'd13;
-			end
-			13: begin
-				state<=4'd1;
-			end
-			1: begin
-				write_enable<=1'b0;
 				sum <= 0;
 				state<=4'd2;
 			end
@@ -241,7 +246,6 @@ always @(posedge VGA_CTL_CLK) begin
 			10: begin
 				write_enable<=1'b0;
 				walkercount<=walkercount+1;
-				
 				state<=4'd7;
 			end
 			15: begin
