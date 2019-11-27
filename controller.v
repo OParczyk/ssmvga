@@ -129,7 +129,7 @@ always @(posedge VGA_CTL_CLK) begin
 	x_rand <= {x_rand[29:0], x_low_bit};
 	y_rand <= {y_rand[29:0], y_low_bit};
 	
-	data_reg<=(write_enable)?data_reg:SRAM_DQ;
+	data_reg=(write_enable)?data_reg:SRAM_DQ;
 	// Key 0 = VGA reset
 	
 	
