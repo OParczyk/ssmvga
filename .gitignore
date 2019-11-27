@@ -3,9 +3,9 @@
 /output_files
 /simulation
 /.qsys_edit
-board_nativelink_simulation.rpt
 board_description.txt
 
 *.bak
-*.qsf
 *.ppf
+*.rpt
+*.summary
