@@ -147,108 +147,109 @@ always @(posedge VGA_CTL_CLK) begin
 		write_enable<=1'b0;
 		addr_reg <= {Coord_X[9:0],Coord_Y[9:0]};
 	end
-	else if(state==0) begin
-		write_enable<=1'b1;
-		addr_reg <= {10'd80,10'd200};
-		data_reg<=16'hffff;
-		
-		
-		x_walker<=(x_low_bit)?10'd200:10'd100;//9;
-		y_walker<=(y_low_bit)?10'd200:10'd100;//9;
-		walkercount<=1;
-		
-		state<=4'd12;
+	else begin
+		case(state)
+			0: begin
+				write_enable<=1'b1;
+				addr_reg <= {10'd80,10'd200};
+				data_reg<=16'hffff;
+				
+				
+				x_walker<=(x_low_bit)?10'd200:10'd100;//9;
+				y_walker<=(y_low_bit)?10'd200:10'd100;//9;
+				walkercount<=1;
+				
+				state<=4'd12;
+			end
+			12: begin
+				write_enable<=1'b0;
+				if(y_walker>0) addr_reg <= {fix_10_bit_length(x_walker[9:0]-1),y_walker[9:0]};
+				else addr_reg <= {fix_10_bit_length(x_walker[9:0]+1),y_walker[9:0]};
+				state<=4'd13;
+			end
+			13: begin
+				state<=4'd1;
+			end
+			1: begin
+				write_enable<=1'b0;
+				sum <= 0;
+				state<=4'd2;
+			end
+			2: begin
+				write_enable<=1'b0;
+				if(y_walker<639) addr_reg <= {fix_10_bit_length(x_walker[9:0]+1),y_walker[9:0]};
+				else addr_reg <= {fix_10_bit_length(x_walker[9:0]-1),y_walker[9:0]};
+				sum<=(data_reg==16'hffff);
+				
+				state<=4'd3;
+			end
+			3: begin
+				write_enable<=1'b0;
+				if(y_walker>0) addr_reg <= {x_walker[9:0],fix_10_bit_length(y_walker-1)};
+				else addr_reg <= {x_walker[9:0],fix_10_bit_length(y_walker+1)};
+				sum<=((data_reg==16'hffff)|sum);
+				
+				state<=4'd4;
+			end
+			4: begin
+				write_enable<=1'b0;
+				if(y_walker<639) addr_reg <= {x_walker[9:0],fix_10_bit_length(y_walker+1)};
+				else addr_reg <= {x_walker[9:0],fix_10_bit_length(y_walker-1)};
+				sum<=((data_reg==16'hffff)|sum);
+				
+				state<=4'd5;
+			end
+			5: begin
+				//LEDG_buf[4]<=data_reg==16'hffff;
+				if(sum | (data_reg==16'hffff)) begin//draw-state
+					write_enable<=1'b1;
+					addr_reg<={x_walker[9:0],y_walker[9:0]};
+					data_reg<=16'hffff;
+					
+					state<=4'd10;
+				end
+				else begin
+					write_enable<=1'b0;
+					x_walker <= x_walker[9:0] + ((x_low_bit)?1:-1);
+					y_walker <= y_walker[9:0] + ((y_low_bit)?1:-1);
+					
+					state<=4'd6;
+				end
+			end
+			6: begin
+				write_enable<=1'b0;
+				if((x_walker >=640) | (y_walker>=480)) begin
+					state<=4'd7;
+					$display("we ran of the map :(");
+				end
+				else state <=4'd12;
+			end
+			7: begin
+				write_enable<=1'b0;
+				if (walkercount ==0) begin
+					state<=4'd15;
+				end
+				else begin
+					x_walker<=(x_low_bit)?10'd0:10'd639;
+					y_walker<=(y_low_bit)?10'd0:10'd479;
+					//x_walker <= x_rand;
+					//y_walker <= y_rand;
+					
+					state <=4'd12;
+				end
+			end
+			10: begin
+				write_enable<=1'b0;
+				walkercount<=walkercount+1;
+				
+				state<=4'd7;
+			end
+			15: begin
+				addr_reg <= {Coord_X[9:0],Coord_Y[9:0]};
+				write_enable<=1'b0;
+			end
+		endcase	
 	end
-	else if(state==12)begin
-		write_enable<=1'b0;
-		if(y_walker>0) addr_reg <= {fix_10_bit_length(x_walker[9:0]-1),y_walker[9:0]};
-		else addr_reg <= {fix_10_bit_length(x_walker[9:0]+1),y_walker[9:0]};
-	state<=4'd13;
-	end
-	else if(state==13)begin
-	state<=4'd1;
-	end
-	else if(state==1)begin
-		write_enable<=1'b0;
-		
-		sum <= 0;
-		state<=4'd2;
-	end
-	else if(state==2)begin
-		write_enable<=1'b0;
-		if(y_walker<639) addr_reg <= {fix_10_bit_length(x_walker[9:0]+1),y_walker[9:0]};
-		else addr_reg <= {fix_10_bit_length(x_walker[9:0]-1),y_walker[9:0]};
-		sum<=(data_reg==16'hffff);
-		
-		state<=4'd3;
-	end
-	else if(state==3)begin
-		write_enable<=1'b0;
-		if(y_walker>0) addr_reg <= {x_walker[9:0],fix_10_bit_length(y_walker-1)};
-		else addr_reg <= {x_walker[9:0],fix_10_bit_length(y_walker+1)};
-		sum<=((data_reg==16'hffff)|sum);
-		
-		state<=4'd4;
-	end
-	else if(state==4)begin
-		write_enable<=1'b0;
-		if(y_walker<639) addr_reg <= {x_walker[9:0],fix_10_bit_length(y_walker+1)};
-		else addr_reg <= {x_walker[9:0],fix_10_bit_length(y_walker-1)};
-		sum<=((data_reg==16'hffff)|sum);
-		
-		state<=4'd5;
-	end
-	else if(state==5)begin
-		//LEDG_buf[4]<=data_reg==16'hffff;
-		if(sum | (data_reg==16'hffff)) begin//draw-state
-			write_enable<=1'b1;
-			addr_reg<={x_walker[9:0],y_walker[9:0]};
-			data_reg<=16'hffff;
-			
-			state<=4'd10;
-		end
-		else begin
-			write_enable<=1'b0;
-			x_walker <= x_walker[9:0] + ((x_low_bit)?1:-1);
-			y_walker <= y_walker[9:0] + ((y_low_bit)?1:-1);
-			
-			state<=4'd6;
-		end
-	end
-	else if(state==6)begin
-		write_enable<=1'b0;
-		if((x_walker >=640) | (y_walker>=480)) begin
-			state<=4'd7;
-			$display("we ran of the map :(");
-		end
-		else state <=4'd12;
-	end
-	else if(state==7)begin
-		write_enable<=1'b0;
-		if (walkercount ==0) begin
-			state<=4'd15;
-		end
-		else begin
-			x_walker<=(x_low_bit)?10'd0:10'd639;
-			y_walker<=(y_low_bit)?10'd0:10'd479;
-			//x_walker <= x_rand;
-			//y_walker <= y_rand;
-			
-			state <=4'd12;
-		end
-	end
-	else if(state==10) begin
-		write_enable<=1'b0;
-		walkercount<=walkercount+1;
-		
-		state<=4'd7;
-	end
-	
-	else if(state==15) begin
-		addr_reg <= {Coord_X[9:0],Coord_Y[9:0]};
-		write_enable<=1'b0;
-	end
-	
 end
 
 endmodule
