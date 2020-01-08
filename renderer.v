@@ -51,7 +51,7 @@ module renderer(clock, start_re, start_im, step, vga_clock, vga_in_column, vga_o
 			bounds_check: begin
 			
 			end
-			calc_new_bounds: begin
+			calc_new_pos: begin
 			
 			end
 		endcase

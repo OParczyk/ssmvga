@@ -17,24 +17,19 @@ end
 endmodule
 
 module controller(LEDR,TD_CLK27,CLOCK_50, VGA_R, VGA_G, VGA_B,VGA_HS,VGA_VS, VGA_BLANK_N, VGA_CLK, VGA_VS, VGA_SYNC_N, TD_RESET_N, KEY,
-SRAM_DQ, SRAM_ADDR,SRAM_CE_N,SRAM_UB_N,SRAM_LB_N, SRAM_WE_N,SRAM_OE_N, SW, GPIO, LEDG, HEX0, HEX1, HEX2, HEX3, HEX4
+ SW, LEDG, HEX0, HEX1, HEX2, HEX3, HEX4
 );
 input CLOCK_50;
 input TD_CLK27;
 input [3:0]KEY;
 input [17:0]SW;
 
-output [39:0]GPIO;
-output [19:0]SRAM_ADDR;
-output SRAM_CE_N,SRAM_UB_N,SRAM_LB_N,SRAM_WE_N,SRAM_OE_N;
 output [9:0] VGA_R,VGA_G,VGA_B;
 output VGA_HS,VGA_VS, VGA_BLANK_N, VGA_CLK, VGA_SYNC_N;
 output TD_RESET_N;
 output[17:0]LEDR;
 output[8:0]LEDG;
 output [6:0] HEX0, HEX1, HEX2, HEX3, HEX4;
-
-inout [15:0]SRAM_DQ;
 
 wire locked;
 wire [9:0] mVGA_R,mVGA_G,mVGA_B;
@@ -58,18 +53,9 @@ reg [9:0] y_walker;
 reg [12:0] walkercount;
 
 assign TD_RESET_N =1'b1;
-assign SRAM_CE_N=1'b0;
-assign SRAM_UB_N=1'b0;
-assign SRAM_LB_N=1'b0;
-assign SRAM_OE_N=write_enable | display_walker;
-assign SRAM_WE_N=~write_enable;
+
 wire display_walker;
 assign display_walker = (addr_reg == {fix_10_bit_length(x_walker[9:0]),y_walker[9:0]} && (VGA_HS || VGA_VS));
-assign SRAM_DQ=(write_enable)?data_reg:(display_walker?16'hF0F0:16'hzzzz);
-assign SRAM_ADDR=addr_reg;
-assign mVGA_R={SRAM_DQ[15:12],6'b0};
-assign mVGA_G={SRAM_DQ[11:8],6'b0};
-assign mVGA_B={SRAM_DQ[7:4],6'b0};
 assign x_low_bit=x_rand[22]^x_rand[30];
 assign y_low_bit=y_rand[26]^y_rand[28];
 assign LEDR={x_walker,y_walker[9:2]};
@@ -123,136 +109,32 @@ to_seven_digit h2(HO2, HEX2);
 to_seven_digit h3(HO3, HEX3);
 to_seven_digit h4(HO4, HEX4);
 
-parameter 
-	init=4'd0,
-	read_left=4'd1,
-	read_right=4'd2,
-	read_top=4'd3,
-	read_bot=4'd4,
-	walk_walker=4'd5,
-	new_walker=4'd6,
-	bounds_check=4'd7,
-	display=4'd8
-;
-
 function [9:0] fix_10_bit_length(input [9:0] val);
   fix_10_bit_length = val[9:0];
 endfunction
 
-always @(posedge VGA_CTL_CLK) begin
-	x_rand <= {x_rand[29:0], x_low_bit};
-	y_rand <= {y_rand[29:0], y_low_bit};
-	
-	data_reg=(write_enable)?data_reg:SRAM_DQ;
-	// Key 0 = VGA reset
-	
-	
-	
-	if(~KEY[1])begin
-	   addr_reg <= {Coord_X[9:0],Coord_Y[9:0]};
-		write_enable<=1'b1;
-		data_reg<={16'b0};		
-		state<=init;
-	end
-	else if(~KEY[2]) begin
-		//pause
-	end
-	else if(~KEY[3]) begin
-		write_enable<=1'b0;
-		addr_reg <= {Coord_X[9:0],Coord_Y[9:0]};
-	end
-	else if(~VGA_HS | ~VGA_VS) begin
-		case(state)
-			init: begin
-				write_enable<=1'b1;
-				addr_reg <= {10'd80,10'd200};
-				data_reg<=16'hffff;
-				
-				
-				x_walker<=(x_low_bit)?10'd200:10'd100;//9;
-				y_walker<=(y_low_bit)?10'd200:10'd100;//9;
-				walkercount<=1;
-				
-				state<=read_left;
-			end
-			read_left: begin
-				write_enable<=1'b0;
-				if(y_walker>0) addr_reg <= {fix_10_bit_length(x_walker[9:0]-1),y_walker[9:0]};
-				else addr_reg <= {fix_10_bit_length(x_walker[9:0]+1),y_walker[9:0]};
-				sum <= 0;
-				state<=read_right;
-			end
-			read_right: begin
-				write_enable<=1'b0;
-				if(y_walker<639) addr_reg <= {fix_10_bit_length(x_walker[9:0]+1),y_walker[9:0]};
-				else addr_reg <= {fix_10_bit_length(x_walker[9:0]-1),y_walker[9:0]};
-				sum<=(data_reg==16'hffff);
-				state<=read_top;
-			end
-			read_top: begin
-				write_enable<=1'b0;
-				if(y_walker>0) addr_reg <= {x_walker[9:0],fix_10_bit_length(y_walker-1)};
-				else addr_reg <= {x_walker[9:0],fix_10_bit_length(y_walker+1)};
-				sum<=((data_reg==16'hffff)|sum);
-				state<=read_bot;
-			end
-			read_bot: begin
-				write_enable<=1'b0;
-				if(y_walker<639) addr_reg <= {x_walker[9:0],fix_10_bit_length(y_walker+1)};
-				else addr_reg <= {x_walker[9:0],fix_10_bit_length(y_walker-1)};
-				sum<=((data_reg==16'hffff)|sum);
-				state<=walk_walker;
-			end
-			walk_walker: begin
-				//LEDG_buf[4]<=data_reg==16'hffff;
-				if(sum | (data_reg==16'hffff)) begin
-					//write walker
-					write_enable<=1'b1;
-					addr_reg<={x_walker[9:0],y_walker[9:0]};
-					data_reg<=16'hffff;
-               walkercount<=walkercount+1;
-               state<=new_walker;                                    
-				end
-				else begin
-					write_enable<=1'b0;
-					x_walker <= x_walker[9:0] + ((x_low_bit)?1:-1);
-					y_walker <= y_walker[9:0] + ((y_low_bit)?1:-1);
-					state<=bounds_check;
-				end
-			end
-			bounds_check: begin
-				write_enable<=1'b0;
-				if((x_walker >=640) | (y_walker>=480)) begin
-					state<=new_walker;
-					$display("we ran of the map :(");
-				end
-				else state <=read_left;
-			end
-			new_walker: begin
-				write_enable<=1'b0;
-				if (walkercount ==0) begin
-					state<=display;
-				end
-				else begin
-					x_walker<=(x_low_bit)?10'd0:10'd639;
-					y_walker<=(y_low_bit)?10'd0:10'd479;
-					//x_walker <= x_rand;
-					//y_walker <= y_rand;
-					
-					state <=read_left;
-				end
-			end
 
-			display: begin
-				addr_reg <= {Coord_X[9:0],Coord_Y[9:0]};
-				write_enable<=1'b0;
-			end
-		endcase	
-	end 
-	else begin
-		addr_reg <= {Coord_X[9:0],Coord_Y[9:0]};
-		write_enable<=1'b0;
-	end
+  
+generate
+  genvar i;
+  
+  for (i=0; i<480; i=i+1) begin : rndr
+		integer in = $realtobits(-2 + i * 0.008333333333333333);
+		renderer i_renderer(
+			.clock(CLOCK_50), 
+			.start_re(32'hC0000000), 
+			.start_im(in), 
+			.step(0), 
+			.vga_clock(0), 
+			.vga_in_column(0), 
+			//.vga_out(0)
+      );
+  end
+endgenerate
+
+always @(posedge VGA_CTL_CLK) begin
+
+	
 end
 
 
